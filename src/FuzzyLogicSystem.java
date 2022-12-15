@@ -61,6 +61,7 @@ class Variable
     String name;
     Double start;
     Double end;
+    Variable (){}
     Variable(String name, Double start, Double end)
     {
         this.name = name;
@@ -110,7 +111,8 @@ public class FuzzyLogicSystem {
             System.err.println ( line.length ( ) + " \n" + lineData.length );
 
             String tmp1 = lineData[2].substring ( 1 , lineData[2].length ( ) - 1 );
-            String tmp2 = lineData[2].substring ( 0 , lineData[3].length ( ) - 1 );
+            String tmp2 = lineData[3].substring ( 0 , lineData[3].length ( ) - 1 );
+
             Double start = Double.parseDouble ( tmp1 );
             Double end = Double.parseDouble ( tmp2 );
 
@@ -131,7 +133,8 @@ public class FuzzyLogicSystem {
                 return;
             }
 
-            variables.add ( new Variable ( variableName , start , end ) );
+            Variable var = new Variable ( variableName , start , end );
+            variables.add ( var );
             variablesTypes.put ( variableName , type );
 
         }

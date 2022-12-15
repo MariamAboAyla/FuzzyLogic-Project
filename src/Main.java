@@ -11,11 +11,11 @@ public class Main {
 
         Scanner scan = new Scanner ( System.in );
 
-        String systemName = scan.next ( );
+        String systemName = scan.nextLine ( );
 
 
         String description = "";
-        while(scan.hasNext ())
+        while(true)
         {
             String line = scan.nextLine ( );
             description+=line;
