@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 
 // to make pair of strings
 class stringPair
@@ -44,14 +41,14 @@ class FuzzySetData
 
     String setName;
     String type;
-    Vector<Double> fuzzySetValues;
+    Vector<Double> fuzzySetValues=new Vector<>();
+
 
     FuzzySetData( String sName,  String  vType, Vector<Double>  fuzzSet){
         setName = sName;
         type = vType;
         fuzzySetValues = fuzzSet;
     }
-
 }
 
 
@@ -61,6 +58,13 @@ class Variable
     String name;
     Double start;
     Double end;
+
+    Double crispVal;
+
+    Vector<FuzzySetData> fuzzysets=new Vector<>();
+
+    Map<String,Double> membership=new HashMap<>();
+
     Variable (){}
     Variable(String name, Double start, Double end)
     {
@@ -69,6 +73,41 @@ class Variable
         this.end = end;
     }
 
+    void init(){
+        for(FuzzySetData set:fuzzysets){
+            membership.put(set.setName,0.0);
+        }
+    }
+    void calcMembership(){
+        for(int i=0;i<fuzzysets.size();i++){
+            FuzzySetData group=fuzzysets.get(i);
+            double val=0.0;
+            if(group.type.equals("TRAP")){
+                Double arr[]={0.0,1.0,1.0,0.0};
+                for(int j=0;j<3;j++){
+                    if(crispVal>=group.fuzzySetValues.get(j)&&crispVal<group.fuzzySetValues.get(j+1)){
+                        double slope=(arr[j+1]-arr[j])/(group.fuzzySetValues.get(j+1)-group.fuzzySetValues.get(j));
+                        double intercept=arr[j+1]-(slope*group.fuzzySetValues.get(j+1));
+                        val=slope*crispVal+intercept;
+                        break;
+                    }
+                }
+                membership.put(group.setName,val);
+            }
+            else if(group.type.equals("TRI")){
+                Double arr[]={0.0,1.0,0.0};
+                for(int j=0;j<2;j++){
+                    if(crispVal>=group.fuzzySetValues.get(j)&&crispVal<group.fuzzySetValues.get(j+1)){
+                        double slope=(arr[j+1]-arr[j])/(group.fuzzySetValues.get(j+1)-group.fuzzySetValues.get(j));
+                        double intercept=arr[j+1]-(slope*group.fuzzySetValues.get(j+1));
+                        val=slope*crispVal+intercept;
+                        break;
+                    }
+                }
+                membership.put(group.setName,val);
+            }
+        }
+    }
 }
 
 
@@ -77,10 +116,12 @@ public class FuzzyLogicSystem {
 
     String name;
     String description;
-    Map<String, String> variablesTypes; // variable name => Maps to its type: IN or OUT
-    Vector<Variable> variables; // contains the variables' data , and to check its type? from map above
-    Map<String, Vector<FuzzySetData>> fuzzySet; // maps each variable_name to its fuzzy set's data
-    Vector<Rules> ruleList; // contains the rules
+    Map<String, Integer> variablesIndx=new HashMap<>(); // variable name => Maps to its type: IN or OUT
+
+    Vector<Variable> inVariables=new Vector<Variable>();// contains the variables' data , and to check its type? from map above
+    Vector<Variable> outVariables=new Vector<Variable>();
+    //Map<String, Vector<FuzzySetData>> fuzzySet=new HashMap<>(); // maps each variable_name to its fuzzy set's data
+    Vector<Rules> ruleList=new Vector<>(); // contains the rules
 
 
 
@@ -134,11 +175,15 @@ public class FuzzyLogicSystem {
             }
 
             Variable var = new Variable ( variableName , start , end );
-            variables.add ( var );
-            variablesTypes.put ( variableName , type );
-
+            if(type.equals("IN")) {
+                inVariables.add(var);
+                variablesIndx.put(variableName,inVariables.size()-1);
+            }
+            else {
+                outVariables.add(var);
+                variablesIndx.put(variableName,outVariables.size()-1);
+            }
         }
-
 
     }
 
@@ -158,7 +203,7 @@ public class FuzzyLogicSystem {
         String variableName = scan.nextLine ( );
 
         // if there is no variable name
-        if (!variablesTypes.containsKey ( variableName ))
+        if (!variablesIndx.containsKey ( variableName ))
         {
             System.out.println ("Error: No such a variable name exists!");
             return;
@@ -204,11 +249,14 @@ public class FuzzyLogicSystem {
             fuzzySetDataVector.add ( new FuzzySetData ( setName, setType, fuzzValues ) );
             
         }
-        
-        fuzzySet.put ( variableName, fuzzySetDataVector );
-
+        int indx=variablesIndx.get(variableName);
+        if(inVariables.size()>indx&&inVariables.get(indx).name.equals(variableName)){
+            inVariables.get(indx).fuzzysets=fuzzySetDataVector;
+        }
+        else{
+            outVariables.get(indx).fuzzysets=fuzzySetDataVector;
+        }
     }
-
 
 
     /*
@@ -217,7 +265,7 @@ public class FuzzyLogicSystem {
      */
     Boolean isValidRule(Vector<stringPair>  input, Vector<stringPair>  output, Vector<String> operation)
     {
-        if (input.isEmpty () || output.isEmpty() || (input.size ()>1 && operation.isEmpty ())) {
+        if (input.isEmpty () || output.isEmpty() || (input.size()>1 && operation.isEmpty ())) {
             System.out.println ( "Error: invalid rule! check input, output and a valid operator!\n" );
             return false;
         }
@@ -288,11 +336,11 @@ public class FuzzyLogicSystem {
             }
 
             // now to get the output variables and values
-            for (int i = idx; i< lineData.length; i++)
+            for (int i = idx; i<lineData.length; i++)
             {
                 if(i+1< lineData.length)
                 {
-                    input.add ( new stringPair ( lineData[i], lineData[i+1] ) );
+                    output.add ( new stringPair ( lineData[i], lineData[i+1] ) );
                     i++;
                 }else{
                     System.out.println ("Error: wrong rule! must write variable name and value!" );
@@ -310,7 +358,7 @@ public class FuzzyLogicSystem {
             }
 
             // check if this variableName is in the database
-            if(!variablesTypes.containsKey ( variableName ))
+            if(!variablesIndx.containsKey ( variableName ))
             {
                 System.out.println ("warning: this variable name doesn't exists!\n");
             }
@@ -336,10 +384,29 @@ public class FuzzyLogicSystem {
      */
     void runSimulationOnCrisp()
     {
-//        Simulation simulation = new Simulation ();
-//        simulation.runSimulation();
+        if(ruleList.isEmpty()) {
+            System.out.println("CAN’T START THE SIMULATION! Please add the fuzzy sets and rules first.");
+            return;
+        }
+
+        for (Variable var : inVariables) {
+            if(var.fuzzysets.isEmpty()){
+                System.out.println("CAN’T START THE SIMULATION! Please add the fuzzy sets and rules first.");
+                return;
+            }
+        }
+
+        System.out.println("Enter the crisp values:\n" +
+                "-----------------------");
+
+        for (Variable var:inVariables){
+            System.out.print(var.name+": ");
+            Scanner cin=new Scanner(System.in);
+            double crispval=cin.nextDouble();
+            var.crispVal=crispval;
+            System.out.println();
+        }
+        Simulation simulator=new Simulation();
+        simulator.doSimulation(this);
     }
-
-
-
 }
