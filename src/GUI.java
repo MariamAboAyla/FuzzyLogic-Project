@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
 
-public class GUI extends JDialog {
+public class GUI extends JFrame {
     private JPanel contentPane;
     private JButton sendButton;
     private JButton exit;
@@ -13,7 +13,6 @@ public class GUI extends JDialog {
     public GUI ( ) {
 
         setContentPane ( contentPane );
-        setModal ( true );
         getRootPane ( ).setDefaultButton ( sendButton );
 
 
@@ -90,7 +89,6 @@ public class GUI extends JDialog {
         GUI dialog = new GUI ( );
         dialog.pack ( );
         dialog.setVisible ( true );
-        System.exit ( 0 );
     }
 
 

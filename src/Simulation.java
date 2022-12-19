@@ -1,3 +1,4 @@
+import org.jfree.ui.RefineryUtilities;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,6 +36,7 @@ public class Simulation{
         Fuzzification ( system );
         Inference ( system );
         Defuzzification ( system );
+        Visualize(system);
         fr.close ( );
     }
 
@@ -89,6 +91,21 @@ public class Simulation{
                 }
             }
             fr.write ( "The predicted " + var.name + " is " + ans + " (" + val + ")\n" );
+        }
+    }
+
+    void Visualize(FuzzyLogicSystem system){
+        for (Variable var:system.inVariables){
+            XYLineChart_AWT chart = new XYLineChart_AWT(var.name, var.name, var.fuzzysets);
+            chart.pack();
+            RefineryUtilities.centerFrameOnScreen( chart );
+            chart.setVisible( true );
+        }
+        for (Variable var:system.outVariables){
+            XYLineChart_AWT chart = new XYLineChart_AWT(var.name,var.name,var.fuzzysets);
+            chart.pack();
+            RefineryUtilities.centerFrameOnScreen( chart );
+            chart.setVisible( true );
         }
     }
 
