@@ -1,23 +1,31 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.Vector;
 
 public class Simulation {
 
-    void doSimulation(FuzzyLogicSystem system){
+    File file = new File("output.txt");
+    FileWriter fr = new FileWriter(file, true);
+    public Simulation() throws IOException {
+    }
+    void doSimulation(FuzzyLogicSystem system) throws IOException {
         Fuzzification(system);
         Inference(system);
         Defuzzification(system);
+        fr.close();
     }
-    void Fuzzification(FuzzyLogicSystem system){
+    void Fuzzification(FuzzyLogicSystem system) throws IOException {
         for(Variable var:system.inVariables){
             var.calcMembership();
         }
         for(Variable var:system.outVariables){
             var.init();
         }
-        System.out.println("Fuzzification => done");
+        fr.write("Fuzzification => done\n");
     }
-    void Inference(FuzzyLogicSystem system){
+    void Inference(FuzzyLogicSystem system) throws IOException {
         for(Rules rule:system.ruleList){
             Variable in1=getVar(system,rule.input.get(0).first);
             Variable in2=getVar(system,rule.input.get(1).first);
@@ -34,10 +42,10 @@ public class Simulation {
             }
             out.membership.put(rule.output.get(0).second,Math.max(out.membership.get(rule.output.get(0).second),val));
         }
-        System.out.println("Inference => done");
+        fr.write("Inference => done\n");
     }
-    void Defuzzification(FuzzyLogicSystem system){
-        System.out.println("Defuzzification => done");
+    void Defuzzification(FuzzyLogicSystem system) throws IOException {
+        fr.write("Defuzzification => done\n");
         for(Variable var:system.outVariables){
             Vector<Double> weights=getWeightedAvg(var);
             double val=0.0,sum=0.0;
@@ -60,7 +68,7 @@ public class Simulation {
                     break;
                 }
             }
-            System.out.println("The predicted "+var.name+" is "+ans+" ("+val+")");
+            fr.write("The predicted "+var.name+" is "+ans+" ("+val+")\n");
         }
     }
     Vector<Double> getWeightedAvg(Variable var){

@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 // to make pair of strings
@@ -130,17 +133,13 @@ public class FuzzyLogicSystem {
      * 2 types of variables each in a different array for its type:
      *    ( IN and OUT )
      */
-    void addVariables()
-    {
+    void addVariables(int[] cnt) throws IOException {
 
         System.out.println ("Enter the variable's name, type (IN/OUT) and range ([lower, upper]):\n"
             +"(Press x to finish)\n--------------------------------------------------------------------");
 
-
-        Scanner scan = new Scanner ( System.in );
-
         while(true) {
-            String line = scan.nextLine ( );
+            String line = Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
             String[] lineData = line.split ( " " );
 
             if(lineData[0].equals ( "x" ))
@@ -148,8 +147,6 @@ public class FuzzyLogicSystem {
 
             String variableName = lineData[0];
             String type = lineData[1];
-
-            System.err.println ( line.length ( ) + " \n" + lineData.length );
 
             String tmp1 = lineData[2].substring ( 1 , lineData[2].length ( ) - 1 );
             String tmp2 = lineData[3].substring ( 0 , lineData[3].length ( ) - 1 );
@@ -193,14 +190,11 @@ public class FuzzyLogicSystem {
      * This function is used for adding fuzzy sets to existing
      * variables
      */
-    void  addFuzzySets()
-    {
-        System.out.println ( "Enter the variable's name:"
+    void  addFuzzySets(int[] cnt) throws IOException {
+        System.out.println ( "Enter the variable's name:\n"
         +"--------------------------");
 
-        Scanner scan = new Scanner ( System.in );
-
-        String variableName = scan.nextLine ( );
+        String variableName = Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
 
         // if there is no variable name
         if (!variablesIndx.containsKey ( variableName ))
@@ -216,7 +210,7 @@ public class FuzzyLogicSystem {
         Vector<FuzzySetData> fuzzySetDataVector = new Vector<> (  );
         while(true) 
         {
-            String line = scan.nextLine ( );
+            String line = Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
             String[] lineData = line.split ( " " );
             String setName = lineData[0];
 
@@ -279,20 +273,16 @@ public class FuzzyLogicSystem {
     /*
      * Function that add the rules to the database/ inference system
      */
-    void addRules()
-    {
+    void addRules(int[] cnt) throws IOException {
 
         System.out.println ( "Enter the rules in this format: (Press x to finish)\n"
             +"IN_variable set operator IN_variable set => OUT_variable set\n"
             +"------------------------------------------------------------");
 
-
-        Scanner scan = new Scanner ( System.in );
-
         while(true)
         {
 
-            String line = scan.nextLine ( );
+            String line = Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
             String[] lineData = line.split ( " " );
 
             if ( lineData[0].equals ( "x" ) )
@@ -372,8 +362,6 @@ public class FuzzyLogicSystem {
 
         }
 
-
-
     }
 
 
@@ -382,8 +370,7 @@ public class FuzzyLogicSystem {
      * To call the function runSimulation from the simulation class
      * to make the steps of fuzzification till get the required result
      */
-    void runSimulationOnCrisp()
-    {
+    void runSimulationOnCrisp(int[] cnt) throws IOException {
         if(ruleList.isEmpty()) {
             System.out.println("CAN’T START THE SIMULATION! Please add the fuzzy sets and rules first.");
             return;
@@ -401,10 +388,8 @@ public class FuzzyLogicSystem {
 
         for (Variable var:inVariables){
             System.out.print(var.name+": ");
-            Scanner cin=new Scanner(System.in);
-            double crispval=cin.nextDouble();
-            var.crispVal=crispval;
-            System.out.println();
+            String crispval=Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
+            var.crispVal=Double.parseDouble(crispval);
         }
         Simulation simulator=new Simulation();
         simulator.doSimulation(this);
