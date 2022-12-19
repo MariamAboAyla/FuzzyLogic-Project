@@ -1,4 +1,0 @@
-Fuzzification => done
-Inference => done
-Defuzzification => done
-The predicted risk is normal (37.50000000000001)

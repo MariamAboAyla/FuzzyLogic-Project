@@ -115,7 +115,7 @@ class Variable
 
 
 // class fuzzyLogicSystem => name, description, variable names, fuzzy sets, and rules
-public class FuzzyLogicSystem {
+public class FuzzyLogicSystem  {
 
     String name;
     String description;
@@ -133,13 +133,13 @@ public class FuzzyLogicSystem {
      * 2 types of variables each in a different array for its type:
      *    ( IN and OUT )
      */
-    void addVariables(int[] cnt) throws IOException {
+    void addVariables(int[] cnt, String inFilePath) throws IOException {
 
         System.out.println ("Enter the variable's name, type (IN/OUT) and range ([lower, upper]):\n"
             +"(Press x to finish)\n--------------------------------------------------------------------");
 
         while(true) {
-            String line = Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
+            String line = Files.readAllLines(Paths.get(inFilePath)).get(cnt[0]++);
             String[] lineData = line.split ( " " );
 
             if(lineData[0].equals ( "x" ))
@@ -190,11 +190,11 @@ public class FuzzyLogicSystem {
      * This function is used for adding fuzzy sets to existing
      * variables
      */
-    void  addFuzzySets(int[] cnt) throws IOException {
+    void  addFuzzySets(int[] cnt, String inFilePath) throws IOException {
         System.out.println ( "Enter the variable's name:\n"
         +"--------------------------");
 
-        String variableName = Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
+        String variableName = Files.readAllLines(Paths.get(inFilePath)).get(cnt[0]++);
 
         // if there is no variable name
         if (!variablesIndx.containsKey ( variableName ))
@@ -210,7 +210,7 @@ public class FuzzyLogicSystem {
         Vector<FuzzySetData> fuzzySetDataVector = new Vector<> (  );
         while(true) 
         {
-            String line = Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
+            String line = Files.readAllLines(Paths.get(inFilePath)).get(cnt[0]++);
             String[] lineData = line.split ( " " );
             String setName = lineData[0];
 
@@ -273,7 +273,7 @@ public class FuzzyLogicSystem {
     /*
      * Function that add the rules to the database/ inference system
      */
-    void addRules(int[] cnt) throws IOException {
+    void addRules(int[] cnt, String inFilePath) throws IOException {
 
         System.out.println ( "Enter the rules in this format: (Press x to finish)\n"
             +"IN_variable set operator IN_variable set => OUT_variable set\n"
@@ -282,7 +282,7 @@ public class FuzzyLogicSystem {
         while(true)
         {
 
-            String line = Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
+            String line = Files.readAllLines(Paths.get(inFilePath)).get(cnt[0]++);
             String[] lineData = line.split ( " " );
 
             if ( lineData[0].equals ( "x" ) )
@@ -370,7 +370,7 @@ public class FuzzyLogicSystem {
      * To call the function runSimulation from the simulation class
      * to make the steps of fuzzification till get the required result
      */
-    void runSimulationOnCrisp(int[] cnt) throws IOException {
+    void runSimulationOnCrisp(int[] cnt, String inFilePath, String outFilePath) throws IOException {
         if(ruleList.isEmpty()) {
             System.out.println("CAN’T START THE SIMULATION! Please add the fuzzy sets and rules first.");
             return;
@@ -388,10 +388,13 @@ public class FuzzyLogicSystem {
 
         for (Variable var:inVariables){
             System.out.print(var.name+": ");
-            String crispval=Files.readAllLines(Paths.get("input.txt")).get(cnt[0]++);
+            String crispval=Files.readAllLines(Paths.get(inFilePath)).get(cnt[0]++);
             var.crispVal=Double.parseDouble(crispval);
         }
-        Simulation simulator=new Simulation();
+
+        Simulation simulator=new Simulation( outFilePath );
+
         simulator.doSimulation(this);
+
     }
 }
