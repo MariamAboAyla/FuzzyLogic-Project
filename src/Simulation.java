@@ -53,11 +53,14 @@ public class Simulation {
                     break;
                 }
                 if(val>=weights.get(i)&&val<weights.get(i+1)){
-                    ans=var.fuzzysets.get(i).setName;
+                    if(val-weights.get(i)<weights.get(i+1)-val)
+                        ans=var.fuzzysets.get(i).setName;
+                    else
+                        ans=var.fuzzysets.get(i+1).setName;
                     break;
                 }
             }
-            System.out.println("The predicted "+var.name+" is "+ans+"("+val+")");
+            System.out.println("The predicted "+var.name+" is "+ans+" ("+val+")");
         }
     }
     Vector<Double> getWeightedAvg(Variable var){
