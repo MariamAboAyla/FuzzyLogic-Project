@@ -1,7 +1,7 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Scanner;
+import java.util.Map;
 import java.util.Vector;
 
 public class Simulation {
@@ -55,17 +55,13 @@ public class Simulation {
             }
             val=val/sum;
             String ans="";
-            for(int i=0;i<weights.size();i++){
-                if(i==weights.size()-1){
-                    ans=var.fuzzysets.get(i).setName;
-                    break;
-                }
-                if(val>=weights.get(i)&&val<weights.get(i+1)){
-                    if(val-weights.get(i)<weights.get(i+1)-val)
-                        ans=var.fuzzysets.get(i).setName;
-                    else
-                        ans=var.fuzzysets.get(i+1).setName;
-                    break;
+            double max=0.0;
+            var.crispVal=val;
+            var.calcMembership();
+            for(Map.Entry<String,Double> set:var.membership.entrySet()){
+                if(set.getValue()>max){
+                    max=set.getValue();
+                    ans=set.getKey();
                 }
             }
             fr.write("The predicted "+var.name+" is "+ans+" ("+val+")\n");
